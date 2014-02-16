@@ -6,7 +6,7 @@ My main goal in writing this was merely to experiment with machine learning via 
 ## What is FOIL?
 For an in-depth description, see the paper cited above. Basically, FOIL can learn the rule, as a set of horn clauses, that defines some relation given a set of examples in the relation and a set of examples not in the relation. For example, suppose you had the following facts:
 
-```
+```prolog
 father(frank, abe).
 father(frank, alan).
 father(alan, sean).
@@ -34,7 +34,7 @@ mother(jan, jane).
 
 Now, suppose you didn't know the rule for the `ancestor` relation, but did have some positive examples of the relation (e.g. Tim is an ancestor of Tom, Jill is an ancestor of Ann, etc.) and some negtaive examples of the relation (e.g. Ann is not an ancestor of Billy, Tom is not an ancestor of George, etc.). From those examples and the above facts, FOIL can generate a rule for the `ancestor` relation such as the following:
 
-```
+```prolog
 ancestor(X, Y) :- father(X, Y).
 ancestor(X, Y) :- mother(X, Y).
 ancestor(X, Y) :- father(Z, Y), ancestor(X, Z).

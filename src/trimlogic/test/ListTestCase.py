@@ -1,5 +1,6 @@
 import unittest
 import logging
+from trimlogic.test.helper import FoilTestCase
 from trimlogic.predicate import KnowledgeBase
 from trimlogic.predicate import RuleBasedPredicate
 from trimlogic.predicate import VariableFactory, UniqueVariableFactory
@@ -12,7 +13,7 @@ from trimlogic.algorithm import fol_bc_ask
 from trimlogic.term import Atom, Term
 from trimlogic.stdlib import components, dot, plist
 
-class ListTestCase(unittest.TestCase):
+class ListTestCase(FoilTestCase):
   
   def setUp(self):
     logging.getLogger("foil_construct_clause").setLevel(logging.DEBUG)
@@ -40,30 +41,9 @@ class ListTestCase(unittest.TestCase):
                        (5, plist([1,2,3,4])),
                        (plist([1,2]), plist([1,2,3,4])))
     foil(member, positive_tuples, negative_tuples, kb, ordering=None)
-    print "%s rules: " % member
-    for r in member.rules: print str(r)
-    
-  def estAppendPredicate(self):
-    print ""
-    v, a = VariableFactory(), AtomFactory()
-    kb = KnowledgeBase()
-    kb.add(components)
-    append = RuleBasedPredicate("append", (Term, Term, Term))
-    kb.add(append)
-    positive_tuples = ((plist([1,2]), plist([1,2,3,4]), plist([1,2,1,2,3,4])),
-                       (plist([1,2,3,4,5,6,7]), plist([5,8]), plist([1,2,3,4,5,6,7,5,8])),
-                       (plist([1,1,1,1,1,1,1]), plist([3,7,4]), plist([1,1,1,1,1,1,1,3,7,4])),
-                       (plist([4,3,2,1]), plist([]), plist([4,3,2,1])),
-                       (plist([]), plist([7,8,9]), plist([7,8,9])),
-                       (plist([]), plist([]), plist([])))
-    negative_tuples = ((plist([1,2]), plist([1,2]), plist([1,2])),
-                       (plist([1,2,3,4]), plist([5,6,7,8]), plist([9,8,10])),
-                       (3, 7, 9),
-                       (3, 7, plist([])),
-                       (plist([]), 7, 8),
-                       (plist([]), plist([]), 8),
-                       (plist([]), 8, plist([])))
-    foil(append, positive_tuples, negative_tuples, kb, ordering=None)
-    print "%s rules: " % append
-    for r in append.rules: print str(r)
-    
+    self.assertFollows(member(11, plist([2,3,5,7,11,13])))
+    self.assertNotFollows(member(12, plist([2,3,5,7,11,13])))
+    self.print_rules(member)
+
+if __name__ == "__main__":
+    unittest.main()

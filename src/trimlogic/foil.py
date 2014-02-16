@@ -1,5 +1,4 @@
 import math, logging, sys, itertools, operator, time
-logging.basicConfig(level=logging.debug)
 from trimlogic.term import UniqueVariableFactory, VariableFactory, Var
 from trimlogic.term import Atom, Pred
 from trimlogic.algorithm import fol_bc_ask
@@ -7,8 +6,7 @@ from trimlogic.counting import choose, permute
 from trimlogic.predicate import Rule, MutableRule
 from trimlogic.partialordering import find_ordering
 from trimlogic.partialordering import create_partial_comparator
-_logger = logging.getLogger()
-timing_logger = logging.getLogger("foil_profiling")
+logger = logging.getLogger(__name__)
 
 ##############################################################################
 # Constants.
@@ -60,12 +58,12 @@ class ExampleTree:
     @type variables: A list of Var objects.
     @return: The number of examples created from extending.
     """
-    _logger.debug("extend( " + str(goals) + ", " + str(variables) + " )")
+    logger.debug("extend( " + str(goals) + ", " + str(variables) + " )")
     extension_count = 0
     examples_count = 0
     for node, bindings in self.enumerate_nodes_bindings():
       extended = False
-      _logger.debug("calling " + str(fol_bc_ask) + " with '" + str(goals) 
+      logger.debug("calling " + str(fol_bc_ask) + " with '" + str(goals) 
                     + "' '" + str(bindings) + "'")
       for answer in fol_bc_ask(goals, bindings):
         if answer != None:
@@ -79,19 +77,18 @@ class ExampleTree:
         extension_count += 1
     self.levels += 1
     self._count_list.append(examples_count)
-    _logger.debug("Performed " + str(extension_count) + " extensions.")
+    logger.debug("Performed " + str(extension_count) + " extensions.")
     return extension_count
   
   def enumerate_nodes_bindings(self, i=None, node=None, bindings=None):
-    logger = logging.getLogger("ExampleTree")
     if i == None: i = self.levels - 1
     if node == None: node = self.root
     if bindings == None: bindings = {}
-    _logger.debug("enumerate_nodes_bindings( " + str(i) + ", " + str(node) + ", " + str(bindings) + " )")
+    logger.debug("enumerate_nodes_bindings( " + str(i) + ", " + str(node) + ", " + str(bindings) + " )")
     for var,const in zip(node.variables, node.values):
       assert not bindings.has_key(var)
       bindings[var] = const
-    _logger.debug("Bindings '" + str(bindings) + "'.")
+    logger.debug("Bindings '" + str(bindings) + "'.")
     if i == 0:
       yield node, bindings
       return
@@ -105,7 +102,7 @@ class ExampleTree:
   def enumerate_examples(self, level=None, node=None):
     if level == None: level = self.levels - 1
     if node == None: node = self.root
-    _logger.debug("enumerate_examples( " + str(level) + ", " 
+    logger.debug("enumerate_examples( " + str(level) + ", " 
                   + str(node) + " )")
     if level == 0:
       yield node.values
@@ -131,7 +128,7 @@ class ExampleTree:
       self._cut_levels(k, child)
   
   def rollback(self):
-    _logger.debug("rollback( )")
+    logger.debug("rollback( )")
     self.cut_levels(self.levels-1)
     self.levels -= 1
     self._count_list.pop()
@@ -185,7 +182,6 @@ class ExampleCollection:
     map(lambda x: x.reset(), self._examples)
     
   def prune_covered(self):
-    logger = logging.getLogger("foil_construct_clause")
     logger.debug("Examples to consider for pruning: ")
     logger.debug(str(self._examples))
     for ex in self._examples[:]:
@@ -284,7 +280,6 @@ def construct_clause_recursive(predicate, rule, training_set, bk,
                                variable_factory=None, ordering=None, depth=0):
   assert isinstance(rule, Rule)
   assert isinstance(training_set, TrainingSet)
-  logger = logging.getLogger("foil_construct_clause")
   logger.debug("Starting construct_clause_recursive(...).")
   logger.debug("Training set contains %s positive examples and %s negative " 
     "examples." % (len(training_set.positive_examples), 
@@ -390,7 +385,6 @@ def insert_literal((gain, literal, new_variables), literals, length):
 # Functions for determining the soundness of recursive literals.
 ##############################################################################
 def determine_param_orderings(predicate):
-  logger = logging.getLogger("foil_determine_ordering")
   logger.debug("Determining ordering for: " + str(predicate))
   
   def establish_relationship(value_pair, index_pair, op, cmp_map):
@@ -439,7 +433,6 @@ def create_unique_variable_sequence(prefix, length):
   return map(lambda x: Var(prefix + length), range(0, length))
 
 def find_partial_ordering_of_terms(rule):
-  logger = logging.getLogger("foil_new_literal")
   logger.debug("Finding ordering for rule '%s'." % rule)
   constraints = []
   for literal in rule.body:
@@ -454,7 +447,6 @@ def find_partial_ordering_of_terms(rule):
   return create_partial_comparator(constraints)
       
 def will_halt(predicate, recursive_literal, variables, ordering=None):
-  logger = logging.getLogger("foil_will_halt")
   will_halt = False
   head_terms = variables[:predicate.arity]
   recr_terms = recursive_literal.terms
@@ -541,7 +533,6 @@ def find_gainful_and_determinate_literals(predicate,
                                           determinate_literals=None, 
                                           new_literals=None, 
                                           grab_size=1):
-  logger = logging.getLogger("foil_new_literal")
   logger.debug("Finding a new literal.")
   logger.debug("Rules so far:")
   for rule in predicate.rules:
@@ -682,7 +673,6 @@ def predicate_rules_postprocessing_compact(predicate,
   @param negative_tuples: Tuples not covered by the predicate. These are used
       it insure that compaction does not affect the coverage of the predicate.
   """
-  logger = logging.getLogger(predicate_rules_postprocessing_compact.func_name)
   logger.debug("Start " + predicate_rules_postprocessing_compact.func_name)
   rules = predicate.rules
   predicate.rules = []
@@ -736,7 +726,7 @@ def predicate_rules_postprocessing(predicate,
                                          positive_tuples,
                                          negative_tuples)
   f = time.clock()
-  timing_logger.debug(predicate_rules_postprocessing_compact.func_name 
+  logger.debug(predicate_rules_postprocessing_compact.func_name 
                       + " completed in %s seconds." % (f-s))
 
 ##############################################################################
@@ -746,7 +736,7 @@ def foil(predicate, positive_tuples, negative_tuples, bk, ordering=None):
   s = time.clock()
   foil_main(predicate, positive_tuples, negative_tuples, bk, ordering)
   f = time.clock()
-  timing_logger.debug(foil_main.func_name 
+  logger.debug(foil_main.func_name 
                       + " completed in %s seconds." % (f-s))
   predicate_rules_postprocessing(predicate, positive_tuples, negative_tuples)
     

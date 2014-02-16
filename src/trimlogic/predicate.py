@@ -189,7 +189,7 @@ class Rule:
     return False
   
   def __str__(self):
-    return str(self.predicate) + "( " + str(self.terms) + " ) :- " + str(self.body)
+    return str(self.predicate) + str(self.terms) + " :- " + ", ".join(map(str, self.body)) + "."
   
   variables = property(fget=get_variables)
 

@@ -1,13 +1,6 @@
 import logging
-logging.getLogger("foil_construct_clause").setLevel(logging.DEBUG)
-logging.getLogger("foil_determine_ordering").setLevel(logging.DEBUG)
-logging.getLogger("foil_new_literal").setLevel(logging.DEBUG)
-logging.getLogger("predicate_rules_postprocessing_compact").setLevel(logging.DEBUG)
-logging.getLogger("foil_profiling").setLevel(logging.DEBUG)
-
-PRINT_RULES = True
-
 import unittest
+from trimlogic.test.helper import FoilTestCase
 from trimlogic.predicate import KnowledgeBase
 from trimlogic.predicate import RuleBasedPredicate
 from trimlogic.predicate import VariableFactory, UniqueVariableFactory, AtomFactory
@@ -35,14 +28,10 @@ class FamilyMember(Atom):
   set_ordering = classmethod(set_ordering)
 
 
-class FamilyTreeTestCase(unittest.TestCase):
+class FamilyTreeTestCase(FoilTestCase):
   
   def setUp(self):
-    logging.getLogger("foil_construct_clause").setLevel(logging.DEBUG)
-    logging.getLogger("foil_determine_ordering").setLevel(logging.DEBUG)
-    logging.getLogger("foil_new_literal").setLevel(logging.DEBUG)
-    logging.getLogger("predicate_rules_postprocessing_compact").setLevel(logging.DEBUG)
-    logging.getLogger("foil_profiling").setLevel(logging.DEBUG)
+    pass
     
   def loadFamilyTree1(self):
     """
@@ -99,7 +88,7 @@ class FamilyTreeTestCase(unittest.TestCase):
     self.mother = RuleBasedPredicate('mother', (FamilyMember, FamilyMember))
     self.kb.add_all([self.mother, self.father])
   
-  def estFindRecursiveRules(self):
+  def testFindRecursiveRules(self):
     from trimlogic.predicate import Rule, MutableRule
     from trimlogic.foil import will_halt
     v, a = self.v, self.a
@@ -164,39 +153,7 @@ class FamilyTreeTestCase(unittest.TestCase):
     self.assertNotFollows(grandfather(a.bob, a.ian))
     self.kb.remove(grandfather)
     self.print_rules(grandfather)
-        
-  def print_rules(self, predicate):
-    if PRINT_RULES:
-      print "Rules for ", predicate, " :"
-      for rule in predicate.rules:
-        print str(rule)
-    
-  def assertFollows(self, arg0, arg1=None):
-    msg, term = None, None
-    if isinstance(arg0, str):
-      msg = arg0
-      term = arg1
-    else:
-      term = arg0
-    for x in fol_bc_ask([term], {}):
-      return
-    if msg:
-      self.fail(msg)
-    else:
-      self.fail()
-      
-  def assertNotFollows(self, arg0, arg1=None):
-    msg, term = None, None
-    if isinstance(arg0, str):
-      msg = arg0
-      term = arg1
-    else:
-      term = arg0
-    for x in fol_bc_ask([term], {}):
-      if msg:
-        self.fail(msg)
-      else:
-        self.fail()
+
 
 if __name__ == "__main__":
     unittest.main()

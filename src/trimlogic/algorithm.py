@@ -4,9 +4,7 @@ from collections import deque
 from trimlogic.stdlib import cut
 from trimlogic.term import *
 from trimlogic.util import *
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
-logger.debug("started logging")
+logger = logging.getLogger(__name__)
 
 def log_unify(unify_func):
   def _unify(s1, s2, bindings=None):
@@ -87,8 +85,6 @@ def _unify(s1, s2, bindings):
       return _unify(apply_bindings_seq(s1[1:], new_bindings), apply_bindings_seq(s2[1:], new_bindings), new_bindings)
   else:
     return None
-    
-#unify = log_unify(unify)
 
 def fol_bc_ask(goals, substitutions):
   """

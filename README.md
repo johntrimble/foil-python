@@ -1,4 +1,4 @@
-# Python FOIL
+# FOIL Python
 This is a Python implementation of FOIL, First Order Inductive Learner, described in J.R. Quinlan's paper [Learning Logical Definitions from Relations](http://link.springer.com/article/10.1023%2FA%3A1022699322624).   In addition, this includes implementations of unification, resolution, and a number of Prolog's standard predicates.
 
 My main goal in writing this was merely to experiment with machine learning via inductive logic, and reproducing J.R. Quinlan's results seemed like a good place to start. There isn't a fancy UI or interactive prompt, but you can look at the test cases to see how to use the library. This really isn't intended for reuse, or as an example of clean idiomatic Python code, it's just an academic exercise, so keep that in mind.
